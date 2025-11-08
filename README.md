@@ -1,5 +1,3 @@
-### `README.md` (Copy-Paste This)
-
 ```markdown
 # BookSwap Flutter
 
@@ -37,12 +35,19 @@ Swap textbooks with classmates using **Firebase Auth, Firestore, and real-time c
 
 ```
 lib/
-├── models/          → Book, Swap, Message
-├── providers/       → State management (Provider)
-├── screens/         → UI: Browse, My Listings, Chats, Settings
-├── methods/         → Reusable widgets (buttons, dialogs)
+├── models/          → Data classes (Book, Swap, Message)
+├── providers/       → State management with Provider
+├── screens/         → UI screens
+│   ├── browse_listings_screen.dart
+│   ├── my_listings_screen.dart
+│   ├── chats_screen.dart
+│   ├── settings_screen.dart
+│   └── add_edit_book_screen.dart
+├── methods/         → Reusable widgets
+│   ├── custom_button.dart
+│   └── image_picker.dart
+├── constants.dart   → Colors, strings, assets
 └── main.dart        → Firebase init + AuthGate
-```
 
 ---
 
