@@ -1,7 +1,3 @@
-Below is the **final, ready-to-commit `README.md`** with **your GitHub username `Maxtoshie`** already inserted.
-
----
-
 ### `README.md` (Copy-Paste This)
 
 ```markdown
@@ -140,36 +136,7 @@ flutter clean && flutter pub get && flutter build web
 # Deploy
 firebase deploy --only hosting
 ```
-
----
-
-## Assignment Compliance
-
-| Requirement | Met? |
-|-----------|------|
-| Firebase Auth + Email Verification | Done |
-| Full CRUD (Create, Read, Update, Delete) | Done |
-| Real-time swap state sync | Done |
-| State management with Provider | Done |
-| 4-screen BottomNavigationBar | Done |
-| Bonus: Real-time chat | Done |
-| 10+ incremental commits | Done |
-| Clean `.gitignore` | Done |
-| No secrets committed | Done |
-
 ---
 
 **Built by Maxtoshie — ALU Student**
 
----
-```
-
----
-
-## Final Steps
-
-
-
-# 3. Commit README + screenshots
-
-```
