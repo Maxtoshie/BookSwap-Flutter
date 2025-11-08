@@ -6,8 +6,6 @@
 **A real-time book marketplace for students**
 Swap textbooks with classmates using **Firebase Auth, Firestore, and real-time chat**.
 
-**Live Demo**: [https://bookswap-flutter-ac588.web.app](https://bookswap-flutter-ac588.web.app)
-
 ---
 
 ## Features
@@ -108,8 +106,6 @@ swaps/{swapId}
 | Browse Listings | Chats |
 |----------------|-------|
 | ![Browse](screenshots/browse.png) | ![Chats](screenshots/chats.png) |
-
-> *(Add real screenshots before submission)*
 
 ---
 
