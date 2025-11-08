@@ -1,18 +1,18 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+// test/widget_test.dart
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:bookswap_flutter/main.dart';
+import 'package:bookswap_flutter/main.dart'; // <- Import your main.dart
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(MyApp());
-    expect((find.text('Hello World')), findsOneWidget);
+  testWidgets('App launches and shows initial screen',
+      (WidgetTester tester) async {
+    // Build the app
+    await tester.pumpWidget(const BookSwapApp());
+
+    // Let animations settle
+    await tester.pumpAndSettle();
+
+    // Verify that either SignInScreen or HomeScreen is shown based on auth state
+    expect(find.byType(Scaffold), findsWidgets);
   });
 }

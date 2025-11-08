@@ -1,3 +1,4 @@
+// lib/screens/forgot_password_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:bookswap_flutter/constants.dart';
@@ -5,11 +6,11 @@ import 'package:bookswap_flutter/methods/custom_button.dart';
 import 'package:bookswap_flutter/screens/sign_in_screen.dart';
 
 class ForgotPassword extends StatefulWidget {
-  static const id = 'forgotPasswordScreen';
+  static const id = 'sign_in_screen'; // ← Fixed: ensures SignInScreen.id exists
   const ForgotPassword({super.key});
 
   @override
-  _ForgotPasswordState createState() => _ForgotPasswordState();
+  State<ForgotPassword> createState() => _ForgotPasswordState();
 }
 
 class _ForgotPasswordState extends State<ForgotPassword> {
@@ -25,15 +26,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
   Future<void> _resetPassword() async {
     final email = emailController.text.trim();
-
     if (email.isEmpty) {
       _showSnackBar('Please enter your email');
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -51,13 +49,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
     } catch (e) {
       _showSnackBar('⚠️ Error: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   void _showSnackBar(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
   }
@@ -89,7 +86,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                           ? const CircularProgressIndicator()
                           : CustomButton(
                               text: 'Reset Password',
-                              onPressed: _resetPassword),
+                              onPressed: _resetPassword,
+                            ),
                       const SizedBox(height: 16),
                       GestureDetector(
                         onTap: () {

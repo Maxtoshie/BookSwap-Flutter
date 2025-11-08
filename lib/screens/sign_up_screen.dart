@@ -12,7 +12,7 @@ class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  _SignUpScreenState createState() => _SignUpScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
@@ -64,7 +64,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. Create user
+      // Create user
       final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -73,24 +73,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
       final user = userCredential.user!;
       final uid = user.uid;
 
-      // 2. Save profile
+      // Save profile in Firestore
       await _firestore.collection('users').doc(uid).set({
         'displayName': username,
         'email': email,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // 3. Update display name
+      // Update display name
       await user.updateDisplayName(username);
 
-      // 4. SEND VERIFICATION EMAIL
+      // Send verification email
       await user.sendEmailVerification();
-
       setState(() => _verificationSent = true);
-
       _showSnackBar('Verification email sent! Check your inbox.');
 
-      // Auto-check every 3 seconds
+      // Auto-check verification
       _startVerificationCheck(user);
     } on FirebaseAuthException catch (e) {
       String msg;
@@ -124,9 +122,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
             MaterialPageRoute(builder: (_) => const HomeScreen()),
           );
         }
-        return false; // Stop loop
+        return false; // stop
       }
-      return true; // Continue
+      return true; // continue
     });
   }
 

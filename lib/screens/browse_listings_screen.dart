@@ -35,13 +35,11 @@ class BrowseListingsScreen extends StatelessWidget {
             .where('status', isEqualTo: 'available')
             .snapshots(),
         builder: (context, snapshot) {
-          // ── LOADING ───────────────────────────────────────────────────────
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
                 child: CircularProgressIndicator(color: theme.primaryColor));
           }
 
-          // ── NO DATA ───────────────────────────────────────────────────────
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(
               child: Text(
@@ -51,7 +49,6 @@ class BrowseListingsScreen extends StatelessWidget {
             );
           }
 
-          // ── FILTER OWN BOOKS ───────────────────────────────────────────────
           final filtered = snapshot.data!.docs.where((doc) {
             final data = doc.data() as Map<String, dynamic>;
             final ownerId = data['ownerId'] as String?;
@@ -62,7 +59,6 @@ class BrowseListingsScreen extends StatelessWidget {
             return const Center(child: Text('No books from other users.'));
           }
 
-          // ── LIST ───────────────────────────────────────────────────────────
           return ListView.builder(
             padding: const EdgeInsets.all(12),
             itemCount: filtered.length,
@@ -71,19 +67,12 @@ class BrowseListingsScreen extends StatelessWidget {
               final data = doc.data() as Map<String, dynamic>;
               final bookId = doc.id;
 
-              // ---------- SAFE TITLE ----------
               final title = (data['title'] as String?)?.trim() ?? 'Untitled';
-
-              // ---------- SAFE AUTHOR ----------
               final author = _safeAuthor(data['author']);
-
-              // ---------- TIME AGO ----------
               final ts = data['createdAt'] as Timestamp?;
               final timeAgo = ts != null
                   ? DateFormat('d MMM').format(ts.toDate())
                   : 'recently';
-
-              // ---------- IMAGE (Base64) ----------
               final imageBase64 = data['imageBase64'] as String?;
 
               return Card(
@@ -122,9 +111,6 @@ class BrowseListingsScreen extends StatelessWidget {
     );
   }
 
-  /// ---------------------------------------------------------------
-  /// Builds image from Base64 string or fallback icon
-  /// ---------------------------------------------------------------
   Widget _buildBookImage(String? base64String) {
     if (base64String == null || base64String.isEmpty) {
       return const Icon(Icons.book, size: 60);
@@ -148,17 +134,12 @@ class BrowseListingsScreen extends StatelessWidget {
     }
   }
 
-  /// ---------------------------------------------------------------
-  /// Returns a non-null author string
-  /// ---------------------------------------------------------------
   String _safeAuthor(dynamic raw) {
-    if (raw == null) return 'Unknown Author';
-    if (raw is! String) return 'Unknown Author';
+    if (raw == null || raw is! String) return 'Unknown Author';
     final trimmed = raw.trim();
     return trimmed.isEmpty ? 'Unknown Author' : trimmed;
   }
 
-  // ─────────────────────────────────────────────────────────────────────
   void _initiateSwap(BuildContext ctx, String bookId, String receiverId,
       String senderId) async {
     final ok = await showDialog<bool>(
@@ -192,6 +173,7 @@ class BrowseListingsScreen extends StatelessWidget {
         .doc(bookId)
         .update({'status': 'pending'});
 
+    if (!ctx.mounted) return; // ✅ fixed async context issue
     ScaffoldMessenger.of(ctx)
         .showSnackBar(const SnackBar(content: Text('Swap request sent!')));
   }

@@ -1,6 +1,5 @@
 // lib/screens/add_edit_book_screen.dart
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart'; // ← kIsWeb
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -155,7 +154,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
           'imageBase64': _imageBase64,
           'ownerId': FirebaseAuth.instance.currentUser!.uid,
           'status': 'available',
-          'createdAt': FieldValue.serverTimestamp(), // ← Correct: inside .add()
+          'createdAt': FieldValue.serverTimestamp(),
         });
       }
 
@@ -233,7 +232,7 @@ class _AddEditBookScreenState extends State<AddEditBookScreen> {
               const SizedBox(height: 12),
 
               DropdownButtonFormField<String>(
-                value: _condition,
+                initialValue: _condition,
                 decoration: const InputDecoration(
                   labelText: 'Condition',
                   border: OutlineInputBorder(),

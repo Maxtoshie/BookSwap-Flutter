@@ -126,7 +126,7 @@ class _MyListingsScreenState extends State<MyListingsScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: _statusColor(status).withOpacity(0.1),
+                          color: _statusColor(status).withAlpha((0.1 * 255).round()),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(

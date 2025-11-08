@@ -35,20 +35,20 @@ Swap textbooks with classmates using **Firebase Auth, Firestore, and real-time c
 
 ```
 lib/
-├── models/          → Data classes (Book, Swap, Message)
-├── providers/       → State management with Provider
-├── screens/         → UI screens
+├── models/          to Data classes (Book, Swap, Message)
+├── providers/       to State management with Provider
+├── screens/         to UI screens
 │   ├── browse_listings_screen.dart
 │   ├── my_listings_screen.dart
 │   ├── chats_screen.dart
 │   ├── settings_screen.dart
 │   └── add_edit_book_screen.dart
-├── methods/         → Reusable widgets
+├── methods/         to Reusable widgets
 │   ├── custom_button.dart
 │   └── image_picker.dart
-├── constants.dart   → Colors, strings, assets
-└── main.dart        → Firebase init + AuthGate
-
+├── constants.dart   to Colors, strings, assets
+└── main.dart        to Firebase init + AuthGate
+```
 ---
 
 ## Firebase Data Model

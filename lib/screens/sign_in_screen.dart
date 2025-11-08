@@ -1,11 +1,14 @@
 // lib/screens/sign_in_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'sign_up_screen.dart';
-import 'home_screen.dart';
+import 'package:bookswap_flutter/constants.dart';
+import 'package:bookswap_flutter/methods/custom_button.dart';
+import 'package:bookswap_flutter/screens/home_screen.dart';
+import 'package:bookswap_flutter/screens/forgot_password_screen.dart';
+import 'package:bookswap_flutter/screens/sign_up_screen.dart';
 
 class SignInScreen extends StatefulWidget {
+  static const id = 'sign_in_screen'; // ← Ensures navigation works
   const SignInScreen({super.key});
 
   @override
@@ -13,29 +16,43 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final _emailCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-  bool _loading = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   Future<void> _signIn() async {
-    setState(() => _loading = true);
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      _showSnackBar('Please enter both email and password');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
     try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailCtrl.text.trim(),
-        password: _passCtrl.text,
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      final user = credential.user!;
-
-      // BLOCK UNVERIFIED USERS
+      final user = userCredential.user!;
       if (!user.emailVerified) {
+        _showSnackBar('Please verify your email before signing in.');
         await user.sendEmailVerification();
-        _showSnackBar('Please verify your email first. Check your inbox.');
-        await FirebaseAuth.instance.signOut();
         return;
       }
-
-      await _ensureUserProfile(user);
 
       if (mounted) {
         Navigator.pushReplacement(
@@ -47,11 +64,13 @@ class _SignInScreenState extends State<SignInScreen> {
       String msg;
       switch (e.code) {
         case 'user-not-found':
+          msg = 'No user found for that email.';
+          break;
         case 'wrong-password':
-          msg = 'Invalid email or password';
+          msg = 'Incorrect password.';
           break;
         case 'invalid-email':
-          msg = 'Invalid email';
+          msg = 'Invalid email address.';
           break;
         default:
           msg = e.message ?? 'Sign in failed';
@@ -60,91 +79,73 @@ class _SignInScreenState extends State<SignInScreen> {
     } catch (e) {
       _showSnackBar('Error: $e');
     } finally {
-      setState(() => _loading = false);
+      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _ensureUserProfile(User user) async {
-    final uid = user.uid;
-    final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
-
-    final doc = await docRef.get();
-    if (!doc.exists) {
-      final name = user.displayName ?? user.email?.split('@').first ?? 'User';
-      await docRef.set({
-        'displayName': name,
-        'email': user.email,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-    }
-  }
-
-  void _showSnackBar(String msg) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    }
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            children: [
-              const Icon(Icons.book, size: 80, color: Color(0xFFFFD700)),
-              const Text('BookSwap',
-                  style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white)),
-              const Text('Swap Your Books With Other Students',
-                  style: TextStyle(color: Colors.grey)),
-              const SizedBox(height: 40),
-              TextField(
-                controller: _emailCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  filled: true,
-                  fillColor: Colors.white10,
-                  border: OutlineInputBorder(),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Hero(tag: 'logo', child: Image.asset(kLogoPath)),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: kTextFieldDecoration.copyWith(hintText: 'Email'),
                 ),
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _passCtrl,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Password',
-                  filled: true,
-                  fillColor: Colors.white10,
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 8),
+                TextField(
+                  controller: passwordController,
+                  decoration:
+                      kTextFieldDecoration.copyWith(hintText: 'Password'),
+                  obscureText: true,
                 ),
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 24),
-              _loading
-                  ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: _signIn,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFD700),
-                        foregroundColor: Colors.black,
+                const SizedBox(height: 16),
+                _isLoading
+                    ? const CircularProgressIndicator()
+                    : CustomButton(text: 'Sign In', onPressed: _signIn),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacementNamed(
+                            context, SignUpScreen.id);
+                      },
+                      child: Text(
+                        'Create an account',
+                        style: kSignUpTextStyle,
                       ),
-                      child: const Text('Sign In'),
                     ),
-              TextButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SignUpScreen()),
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacementNamed(
+                            context, ForgotPassword.id);
+                      },
+                      child: Text(
+                        'Forgot Password?',
+                        style: kSignUpTextStyle,
+                      ),
+                    ),
+                  ],
                 ),
-                child: const Text('Create Account',
-                    style: TextStyle(color: Color(0xFFFFD700))),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

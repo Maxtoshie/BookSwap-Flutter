@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'screens/sign_in_screen.dart';
 import 'screens/home_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart'; // REMOVED: not used in main
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

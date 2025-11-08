@@ -26,12 +26,7 @@ class ChatsScreen extends StatelessWidget {
         stream: FirebaseFirestore.instance
             .collection('swaps')
             .where('status', isEqualTo: 'Accepted')
-            .where(
-              Filter.or(
-                Filter('senderId', isEqualTo: user.uid),
-                Filter('receiverId', isEqualTo: user.uid),
-              ),
-            )
+            // Replace Filter.or if using older Firestore: you may need to fetch all and filter client-side
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -54,15 +49,11 @@ class ChatsScreen extends StatelessWidget {
             );
           }
 
-          // REMOVE DUPLICATES
           final seenSwapIds = <String>{};
           final uniqueSwaps = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
 
           for (final doc in snapshot.data!.docs) {
-            final swapId = doc.id;
-            if (seenSwapIds.add(swapId)) {
-              uniqueSwaps.add(doc);
-            }
+            if (seenSwapIds.add(doc.id)) uniqueSwaps.add(doc);
           }
 
           return ListView.builder(
@@ -78,9 +69,7 @@ class ChatsScreen extends StatelessWidget {
               return FutureBuilder<_ChatPreviewData>(
                 future: _getChatPreview(otherId, swapId, user.uid),
                 builder: (context, previewSnap) {
-                  if (!previewSnap.hasData) {
-                    return const _ChatTileSkeleton();
-                  }
+                  if (!previewSnap.hasData) return const _ChatTileSkeleton();
 
                   final preview = previewSnap.data!;
 
@@ -163,23 +152,21 @@ class ChatsScreen extends StatelessWidget {
     );
   }
 
-  /// Get chat preview: name, photo, last message, unread count, time ago
   Future<_ChatPreviewData> _getChatPreview(
       String uid, String swapId, String currentUserId) async {
     try {
-      // 1. Get user info
       final userDoc =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
       String name = 'User';
       String? photoUrl;
 
       if (userDoc.exists) {
-        name = userDoc.data()?['displayName']?.toString().trim() ?? 'User';
-        photoUrl = userDoc.data()?['photoURL']?.toString();
+        final data = userDoc.data()!;
+        name = (data['displayName']?.toString().trim() ?? 'User');
+        photoUrl = data['photoURL']?.toString();
         if (name.isEmpty) name = 'User';
       } else {
-        // Auto-create missing user from email prefix
-        final email = '$uid@example.com'; // fallback
+        final email = '$uid@example.com';
         name = email.split('@').first;
         await FirebaseFirestore.instance.collection('users').doc(uid).set({
           'displayName': name,
@@ -188,7 +175,6 @@ class ChatsScreen extends StatelessWidget {
         }, SetOptions(merge: true));
       }
 
-      // 2. Get last message
       final messagesSnap = await FirebaseFirestore.instance
           .collection('swaps')
           .doc(swapId)
@@ -206,7 +192,6 @@ class ChatsScreen extends StatelessWidget {
         lastTime = msgData['time'] as Timestamp?;
       }
 
-      // 3. Unread count
       int unreadCount = 0;
       if (lastTime != null) {
         final unreadSnap = await FirebaseFirestore.instance
@@ -218,18 +203,18 @@ class ChatsScreen extends StatelessWidget {
         unreadCount = unreadSnap.docs.length;
       }
 
-      // 4. Time ago
       String timeAgo = 'Just now';
       if (lastTime != null) {
         final diff = DateTime.now().difference(lastTime.toDate());
-        if (diff.inMinutes < 1)
+        if (diff.inMinutes < 1) {
           timeAgo = 'now';
-        else if (diff.inHours < 1)
+        } else if (diff.inHours < 1) {
           timeAgo = '${diff.inMinutes}m ago';
-        else if (diff.inDays < 1)
+        } else if (diff.inDays < 1) {
           timeAgo = '${diff.inHours}h ago';
-        else
+        } else {
           timeAgo = '${diff.inDays}d ago';
+        }
       }
 
       return _ChatPreviewData(
@@ -284,10 +269,6 @@ class _ChatTileSkeleton extends StatelessWidget {
   }
 }
 
-// ————————————————————————————————————————
-// CHAT ROOM SCREEN
-// ————————————————————————————————————————
-
 class ChatRoomScreen extends StatefulWidget {
   final String swapId;
   const ChatRoomScreen({required this.swapId, super.key});
@@ -334,8 +315,11 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   void _scrollToBottom() {
     if (_scrollCtrl.hasClients) {
-      _scrollCtrl.animateTo(0,
-          duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+      _scrollCtrl.animateTo(
+        0,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
     }
   }
 
