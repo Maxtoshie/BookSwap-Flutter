@@ -1,0 +1,40 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ──────────────────────────────
+    // BOOKS – Public read, owner write
+    // ──────────────────────────────
+    match /books/{bookId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && request.resource.data.ownerId == request.auth.uid
+                    && request.resource.data.imageBase64 is string
+                    && request.resource.data.imageBase64.size() <= 150 * 1024;
+      allow update, delete: if request.auth != null
+                            && resource.data.ownerId == request.auth.uid;
+    }
+
+    // ──────────────────────────────
+    // SWAPS – Authenticated users
+    // ──────────────────────────────
+    match /swaps/{swapId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ──────────────────────────────
+    // CHAT MESSAGES – Under swaps
+    // ──────────────────────────────
+    match /swaps/{swapId}/messages/{msgId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ──────────────────────────────
+    // USERS – Optional (for display names)
+    // ──────────────────────────────
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

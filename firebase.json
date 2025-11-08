@@ -1,0 +1,44 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "bookswap-flutter-ac588",
+          "appId": "1:871104642601:android:87d19a7ddc11890681e638",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "bookswap-flutter-ac588",
+          "configurations": {
+            "android": "1:871104642601:android:87d19a7ddc11890681e638",
+            "ios": "1:871104642601:ios:50c2ff4ef2610d6e81e638",
+            "macos": "1:871104642601:ios:50c2ff4ef2610d6e81e638",
+            "web": "1:871104642601:web:1bd1bae60f8b237581e638",
+            "windows": "1:871104642601:web:cbafbb59d3cf881f81e638"
+          }
+        }
+      }
+    }
+  },
+
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+
+  "firestore": {
+    "rules": "firestore.rules"
+  }
+}
