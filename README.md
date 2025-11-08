@@ -96,7 +96,10 @@ swaps/{swapId}
 
 4. **Run the app**
    ```bash
-   flutter run -d chrome
+   flutter emulators
+   flutter emulators --launch <emulator_id>
+   flutter run
+
    ```
 
 ---
